@@ -12,8 +12,10 @@ class CentralUser extends Model
         'tenant_id'
     ];
 
+    protected $connection = 'mysql';
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
-} 
+}

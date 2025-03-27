@@ -14,8 +14,6 @@ class UserMinlistResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'image' => $imageUrl,
-//            'avatar' => File::getFileObject($this->avatar,'user'),
-            'phone' => $this->phone,
             'email' => $this->email,
         ];
     }

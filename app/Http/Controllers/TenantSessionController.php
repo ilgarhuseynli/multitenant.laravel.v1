@@ -12,40 +12,51 @@ class TenantSessionController extends Controller
     public function selectTenant(Request $request): JsonResponse
     {
         $request->validate([
-            'tenant_id' => 'required|string|exists:tenants,id'
+            'tenant_id' => 'required|string'
         ]);
 
         $user = $request->user();
-        $tenant = Tenant::find($request->tenant_id);
-        
+
+        // Find all tenants where this user exists
+        CentralUser::where('email', $user->email)
+            ->where('tenant_id', $request->tenant_id)
+            ->firstOrFail();
+
+        $tenant = Tenant::findOrFail($request->tenant_id);
+
         // Revoke current token
         $user->currentAccessToken()->delete();
-        
-        // Create new token with the selected tenant
-        $token = $user->createTokenWithTenant('auth_token', $tenant->id);
-        
+
         // Initialize tenancy for the current request
         tenancy()->initialize($tenant);
-        
+
+        // Create new token with the selected tenant
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+
         return response()->json([
             'message' => 'Tenant selected successfully',
-            'token' => $token->plainTextToken, 
+            'token' => $token,
             'tenant' => $tenant
         ]);
     }
 
     public function getCurrentTenant(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $metadata = json_decode($user->currentAccessToken()->metadata ?? '{}', true);
-        $tenantId = $metadata['tenant_id'] ?? null;
-        
+        // Retrieve tenant ID from request header
+        $tenantId = $request->header('X-Tenant');
+
         if (!$tenantId) {
-            return response()->json(['message' => 'No tenant associated with this token'], 404);
+            return response()->json(['message' => 'Tenant ID is missing'], 400);
         }
-        
+
+        // Find tenant
         $tenant = Tenant::find($tenantId);
-        
+
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant not found'], 404);
+        }
+
         return response()->json([
             'tenant' => $tenant
         ]);
@@ -57,9 +68,9 @@ class TenantSessionController extends Controller
             ->with('tenant')
             ->get()
             ->pluck('tenant');
-            
+
         return response()->json([
             'tenants' => $tenants
         ]);
     }
-} 
+}

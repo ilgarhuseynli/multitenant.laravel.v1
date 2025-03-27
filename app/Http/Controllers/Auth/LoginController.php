@@ -5,16 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\CentralUser;
 use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -59,34 +57,12 @@ class LoginController extends Controller
         $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
-
-        // Attempt authentication in the tenant's context
-//        $user = User::where('email', $request->email)->first();
-//
-//        if (!$user || !Hash::check($request->password, $user->password)) {
-//            throw ValidationException::withMessages([
-//                'email' => ['The provided credentials are incorrect.'],
-//            ]);
-//        }
-
-        // Create token with tenant ID embedded
-        $token = $user->createTokenWithTenant('auth_token', $tenant->id);
-
         return response()->json([
             'message' => 'Logged in successfully',
-            'token' => $token->plainTextToken,
+            'token' => $token,
             'user' => $user,
             'tenant' => $tenant
         ]);
     }
 
-    public function logout(Request $request): JsonResponse
-    {
-        // Revoke the token that was used to authenticate the current request
-        if ($request->user()) {
-            $request->user()->currentAccessToken()->delete();
-        }
-
-        return response()->json(['message' => 'Logged out successfully']);
-    }
 }

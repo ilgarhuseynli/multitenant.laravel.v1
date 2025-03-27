@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Central;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
@@ -20,7 +20,7 @@ class AuthController extends Controller
         $request->authenticate();
 
         $user = $request->user();
-        $token = $user->createToken('auth-token');
+        $token = $user->createToken('SuperAdminToken', ['super-admin']);
 
         return response()->json([
             'token' => $token->plainTextToken,
@@ -29,11 +29,6 @@ class AuthController extends Controller
     }
 
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function register(Request $request)
     {
         $request->validate([
@@ -59,10 +54,6 @@ class AuthController extends Controller
     }
 
 
-
-    /**
-     * Destroy an authenticated session.
-     */
     public function logout(Request $request)
     {
         // Delete the token
@@ -74,34 +65,12 @@ class AuthController extends Controller
     }
 
 
-
-    // get the authenticated user method
     public function user(Request $request) {
 
         $userData = new UserResource($request->user());
 
-        return response()->json([
-            $userData
-        ]);
+        return response()->json(new UserResource($userData));
     }
 
-
-
-    public function settings(Request $request) {
-
-        $user = Auth::user();
-
-//        $userPerms = $user->getPermissions();
-//
-//        $permissionsArray = [];
-//        foreach ($userPerms as $key => $val) {
-//            $permissionsArray[$val['title']] = $val['allow'];
-//        }
-
-        return response()->json([
-            'account' => new UserResource($user),
-//            'permissions' => $permissionsArray,
-        ]);
-    }
 
 }

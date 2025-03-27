@@ -63,12 +63,12 @@ class User extends Authenticatable
     public function createTokenWithTenant(string $name, string $tenantId, array $abilities = ['*'])
     {
         $token = $this->createToken($name, $abilities);
-        
+
         // Store the tenant ID in the token's metadata
         $token->accessToken->forceFill([
             'metadata' => json_encode(['tenant_id' => $tenantId])
         ])->save();
-        
+
         return $token;
     }
 }
