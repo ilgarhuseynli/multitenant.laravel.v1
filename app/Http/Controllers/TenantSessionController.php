@@ -62,15 +62,17 @@ class TenantSessionController extends Controller
         ]);
     }
 
-    public function getAvailableTenants(string $email): JsonResponse
+    public function getAvailableTenants(Request $request): JsonResponse
     {
-        $tenants = CentralUser::where('email', $email)
+        $request->validate([
+            'email' => 'required|string|email|max:255',
+        ]);
+
+        $tenants = CentralUser::where('email', $request->email)
             ->with('tenant')
             ->get()
             ->pluck('tenant');
 
-        return response()->json([
-            'tenants' => $tenants
-        ]);
+        return response()->json($tenants);
     }
 }
