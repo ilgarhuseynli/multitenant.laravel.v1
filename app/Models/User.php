@@ -56,4 +56,19 @@ class User extends Authenticatable
         'name',
         'email',
     ];
+
+    /**
+     * Create a new personal access token for the user with tenant context.
+     */
+    public function createTokenWithTenant(string $name, string $tenantId, array $abilities = ['*'])
+    {
+        $token = $this->createToken($name, $abilities);
+        
+        // Store the tenant ID in the token's metadata
+        $token->accessToken->forceFill([
+            'metadata' => json_encode(['tenant_id' => $tenantId])
+        ])->save();
+        
+        return $token;
+    }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,8 +17,6 @@ foreach (config('tenancy.central_domains') as $domain) {
         Route::get('/', function () {
             return view('welcome');
         });
-
-        Route::get('login', [LoginController::class,'showLogin'])->name('login');
 
     });
 }

@@ -25,9 +25,11 @@ class TenantController extends Controller
                 'domain' => $tenantName.'.localhost',
             ]);
 
-            Tenant::all()->runForEach(function () {
-                User::factory()->create();
-            });
+            tenant()->initialize($tenant->id);
+
+            User::factory()->create();
+
+
         }catch (\Exception $exception){
             return response()->json(['error' => $exception->getMessage()], 500);
         }
